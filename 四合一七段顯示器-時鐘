@@ -1,24 +1,37 @@
 #include <SevSeg.h>
 
 SevSeg sevseg; //Instantiate a seven segment object
-
 void setup() {
   byte numDigits = 4;
   byte digitPins[] = {5,4,3,2};
-  byte segmentPins[] = {6,7,8,9,10,11,12,13};
+  byte segmentPins[] = {6, 7, 8, 9, 10, 11, 12, 13};
   sevseg.begin(COMMON_CATHODE, numDigits, digitPins,segmentPins);
-  sevseg.setBrightness(100);
+  sevseg.setBrightness(90);
+  pinMode(A0,INPUT_PULLUP);
+  pinMode(A1,INPUT_PULLUP);
 }
 
 void loop() { 
   static int Hour=0;
   static int Min=0;
-  int i;
+  int Step,i;
+  boolean Pin10,Pin11;
+  Pin10= digitalRead (A0); // Reset
+  Pin11 = digitalRead (A1); // Reverse
+  if (Pin10 == LOW){
+    Min = Hour = 0;  
+  }
+  if (Pin11 ==LOW){
+      Step = -1; // Reverse
+    }
+  else {
+      Step = 1;
+    }
   sevseg.setNumber(Hour * 100 + Min, 0);
   for(i=1;i<30000;i++){
     sevseg.refreshDisplay();
   }
-  Min = Min + 1;
+  Min = Min + Step;
   if (Min == 60){ 
     Min = 0;
     if (Hour == 23){
@@ -27,5 +40,14 @@ void loop() {
     else{
       Hour++; 
     }
-  }               
+  }
+  if(Min == -1){
+    Min = 59;
+    if (Hour == 0){
+      Hour = 23;  
+    }
+    else{
+        Hour--; 
+    } 
+   }               
 }
